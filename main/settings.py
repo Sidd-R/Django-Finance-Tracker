@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+get_env = os.environ.get
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -52,8 +57,8 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'userprofile.UserProfile'
 
 ANYMAIL = {
-    "MAILGUN_API_KEY": "da5575efb64316e05c08604110bb8a37-a2dd40a3-6ce870ca",
-    "MAILGUN_SENDER_DOMAIN": 'sandbox1e663f88e7a940299b6047946a73fe0c.mailgun.org',  
+    "MAILGUN_API_KEY": get_env('MAILGUN_API_KEY'),
+    "MAILGUN_SENDER_DOMAIN": get_env('MAILGUN_SENDER_DOMAIN'),  
     "MAILGUN_API_URL": 'https://api.mailgun.net/v3'
 }
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend" 
@@ -91,8 +96,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'access_type': 'online',
         },
         'APP': {
-            'client_id': '1075765385190-bdkbb4rcqjv35tjd2bi79djvlc6ngdcn.apps.googleusercontent.com',
-            'secret': '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'
+            'client_id': get_env('GOOGLE_OAUTH_CLIENT_ID'),
+            'secret': get_env('GOOGLE_OAUTH_SECRET'),
         }
     }
 }
