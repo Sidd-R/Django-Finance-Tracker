@@ -56,6 +56,8 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'userprofile.UserProfile'
 
+
+
 ANYMAIL = {
     "MAILGUN_API_KEY": get_env('MAILGUN_API_KEY'),
     "MAILGUN_SENDER_DOMAIN": get_env('MAILGUN_SENDER_DOMAIN'),  
@@ -74,6 +76,8 @@ ACCOUNT_FORMS = {
     'signup': 'userprofile.forms.UserSignupForm',  
 }
 
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
 LOGIN_REDIRECT_URL = '/dashboard/'
 ACCOUNT_LOGOUT_REDIRECT = 'accounts'
 
@@ -81,7 +85,7 @@ SITE_ID = 1
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 # ACCOUNT_EMAIL_VERIFICATION = 'optional'
@@ -98,6 +102,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'APP': {
             'client_id': get_env('GOOGLE_OAUTH_CLIENT_ID'),
             'secret': get_env('GOOGLE_OAUTH_SECRET'),
+            'key': ''
         }
     }
 }

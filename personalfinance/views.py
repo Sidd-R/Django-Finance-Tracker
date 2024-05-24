@@ -12,12 +12,34 @@ from django.shortcuts import redirect
 from django.http import Http404, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .budget_tracker import hasBudgetExceeded
-from django.core.mail import send_mail
-
+from django.db.models import F
+from datetime import datetime, timedelta, date
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth
 
 @login_required
 def dashboard(request):
-    return render(request, "dashboard.html", {"title": "Dashboard"})
+    # Calculate total income and expenses
+    total_income = Income.objects.aggregate(total=Sum('amount'))['total'] or 0
+    total_expenses = Expense.objects.aggregate(total=Sum('amount'))['total'] or 0
+
+    # Group expenses by category
+    expenses_by_category = Expense.objects.values('category').annotate(total=Sum('amount')).order_by('-total')
+
+    # Calculate monthly income and expenses for the last 6 months
+    today = date.today()
+    six_months_ago = today - timedelta(days=180)
+    income_by_month = Income.objects.filter(date__gte=six_months_ago).annotate(month=TruncMonth('date')).values('month').annotate(total=Sum('amount')).order_by('month')
+    expenses_by_month = Expense.objects.filter(date__gte=six_months_ago).annotate(month=TruncMonth('date')).values('month').annotate(total=Sum('amount')).order_by('month')
+
+    context = {
+        'total_income': total_income,
+        'total_expenses': total_expenses,
+        'expenses_by_category': expenses_by_category,
+        'income_by_month': income_by_month,
+        'expenses_by_month': expenses_by_month,
+    }
+    return render(request, 'dashboard.html', context)
 
 
 # drf views
@@ -35,7 +57,8 @@ class IncomeView(APIView):
 
     def get(self, request):
         context = {}
-        incomes = Income.objects.filter(user=request.user)
+        # sort by created_at in descending order then date in descending order
+        incomes = Income.objects.filter(user=request.user).order_by('-created_at','-date')
         paginator = Paginator(incomes, 7)
         page = request.GET.get("page")
         total_items = len(incomes)  # total number of items
@@ -57,6 +80,9 @@ class IncomeView(APIView):
         start_item += 1
 
         no_of_pages = paginator.num_pages
+        
+        # get dues
+        context["dues"] = Expense.objects.filter(user=request.user, split=True).exclude(recovered=F('divisions')).order_by('date')
 
         context["transactions"] = incomes
         context["title"] = "Income"
@@ -134,7 +160,7 @@ class ExpenseView(APIView):
 
     def get(self, request, budget_exceeded=None):
         context = {}
-        expenses = Expense.objects.filter(user=request.user)
+        expenses = Expense.objects.filter(user=request.user).order_by('-created_at','-date')
         paginator = Paginator(expenses, 7)
         page = request.GET.get("page")
         total_items = len(expenses)
@@ -171,8 +197,11 @@ class ExpenseView(APIView):
 
     def post(self, request):
         serializer = ExpenseSerializer(data=request.data)
+        print(request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
+            print(serializer.data)
+            
             budget_exceeded = hasBudgetExceeded(request.user, serializer.instance)
             return self.get(request,budget_exceeded)
 
@@ -295,3 +324,30 @@ class EditBudgetView(APIView):
         budget = self.get_object(pk)
         budget.delete()
         return HttpResponse(status=204)
+
+
+@login_required 
+def due_received(request, pk):
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    expense = Expense.objects.get(pk=pk)
+    # form data
+    multiple = request.POST.get('multiple')
+    print(request.POST)
+    if multiple:
+        amount = (expense.divisions - expense.recovered)*expense.amount/expense.divisions
+        expense.recovered = expense.divisions
+    else:
+        amount = expense.amount/expense.divisions
+        expense.recovered += 1    
+        
+    income = Income.objects.create(
+        user = expense.user,
+        amount = amount,
+        source = "Recovery of expense: "+expense.description,
+        date = datetime.now()
+    )
+    income.save()
+    
+    expense.save()
+    return redirect("income")

@@ -12,4 +12,5 @@ urlpatterns = [
     path('expense/edit/<int:pk>', views.EditExpenseView.as_view(), name='edit_expense'),
     path('budget/', views.BudgetView.as_view(), name='budget'),
     path('budget/edit/<int:pk>', views.EditBudgetView.as_view(), name='edit_budget'),
+    path('due/<int:pk>', views.due_received, name='due'),
 ]

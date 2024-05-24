@@ -10,6 +10,7 @@ class Transaction(models.Model):
     description = models.TextField(blank=True, null=True)
     receipt = models.ImageField(upload_to="receipts/", blank=True, null=True)
     recurring = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         abstract = True
@@ -38,7 +39,9 @@ class Expense(Transaction):
         ("others", "Others"),
     ]
     category = models.CharField(max_length=100, choices=EXPENSE_CATEGORY)
-
+    split = models.BooleanField(default=False)
+    divisions = models.IntegerField(default=1)
+    recovered = models.IntegerField(default=1)
     def __str__(self):
         return f"Expense - {self.amount} ({self.date}) - {self.category}"
 

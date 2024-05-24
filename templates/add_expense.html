@@ -26,4 +26,45 @@
     </div>
   </div>
 </div>
+
+<div class="flex items-center justify-between mb-6">
+  <div class="flex items-center">
+      <input
+          id="split"
+          name="split"
+          type="checkbox"
+          class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+      />
+      <label for="remember_me" class="ml-2 block text-sm text-gray-900">Split Expense</label>
+  </div>
+</div>
+
+
+<div class="mb-6">
+  <div
+    class="mt-6 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6"
+  >
+    <div class="sm:col-span-4">
+      <label
+        for="username"
+        class="block text-sm font-medium leading-6 text-gray-900"
+        >Divisions</label
+      >
+      <div class="mt-2">
+        <div
+          class="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md"
+        >
+          <input
+            type="number"
+            id="divisions"
+            name="divisions"
+            value="1"
+            class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+            placeholder="0.0"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock name %}
