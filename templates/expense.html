@@ -1,0 +1,29 @@
+{% extends "transaction.html" %}
+{% block title %}Expense{% endblock title %}
+{% block name %}
+Category
+{% endblock name %}
+{% block rows %}
+{% include "add_expense.html" %}
+{% for error in serializer.errors %}
+    <div class="text-red-500">{{error}}</div>
+    {% endfor %}
+{% for expense in transactions %}
+<tr>
+  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{expense.category}}</td>
+  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{expense.amount}}
+    {% if expense.receipt %}
+      <a href="{{ expense.receipt.url }}" class="underline text-blue-500" >(receipt)</a>
+    {% endif %}
+
+  </td>
+  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{expense.date}}</td>
+  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{expense.description|truncatechars:20}}</td>
+  <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+    <a href="/expense/edit/{{expense.id}}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+  </td>
+</tr>
+{% endfor %}
+
+{% endblock rows %}
+

@@ -1,0 +1,34 @@
+{% extends "transaction.html" %} 
+{% block name %} Source {% endblock name %} 
+{% block rows %} 
+  {% include "add_income.html" %} 
+  {% for income in transactions %}
+  <tr>
+    <td
+      class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
+    >
+      {{income.source}}
+    </td>
+    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+      {{income.amount}}{% if income.receipt %}
+      <a href="{{ income.receipt.url }}" class="underline text-blue-500"
+        >(receipt)</a
+      >
+      {% endif %}
+    </td>
+    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+      {{income.date}}
+    </td>
+    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+      {{income.description|truncatechars:20}}
+    </td>
+    <td
+      class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6"
+    >
+      <a href="edit/{{income.id}}" class="text-indigo-600 hover:text-indigo-900"
+        >Edit</a
+      >
+    </td>
+  </tr>
+  {% endfor %} 
+{% endblock rows %}
