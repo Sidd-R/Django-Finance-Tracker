@@ -2,9 +2,10 @@
 {% block title %}Expense{% endblock title %}
 {% block name %}
 Category
+{% include "add_expense.html" %}
+
 {% endblock name %}
 {% block rows %}
-{% include "add_expense.html" %}
 {% for error in serializer.errors %}
     <div class="text-red-500">{{error}}</div>
     {% endfor %}
@@ -23,7 +24,17 @@ Category
     <a href="/expense/edit/{{expense.id}}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
   </td>
 </tr>
+
 {% endfor %}
+{% if budget_exceeded %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+    alert(`{% for budget in budget_exceeded %}You have exceeded your {{budget.period}} budget for {{budget.category}}. Your budget was {{budget.amount}} {% endfor %}`)
+    }, 1000)
+  })
+</script>
+{% endif %}
 
 {% endblock rows %}
 

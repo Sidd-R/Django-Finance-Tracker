@@ -6,7 +6,7 @@ class Transaction(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     # default date is the current date
-    date = models.DateField(auto_now_add=True, blank=True)
+    date = models.DateField()
     description = models.TextField(blank=True, null=True)
     receipt = models.ImageField(upload_to="receipts/", blank=True, null=True)
     recurring = models.BooleanField(default=False)

@@ -1,7 +1,8 @@
 {% extends "transaction.html" %} 
-{% block name %} Source {% endblock name %} 
+{% block name %} 
+{% include "add_income.html" %} 
+Source {% endblock name %} 
 {% block rows %} 
-  {% include "add_income.html" %} 
   {% for income in transactions %}
   <tr>
     <td

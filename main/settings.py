@@ -43,12 +43,22 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'compressor',
+    'anymail',
     'rest_framework',
     'userprofile',
     'personalfinance',
 ]
 
 AUTH_USER_MODEL = 'userprofile.UserProfile'
+
+ANYMAIL = {
+    "MAILGUN_API_KEY": "da5575efb64316e05c08604110bb8a37-a2dd40a3-6ce870ca",
+    "MAILGUN_SENDER_DOMAIN": 'sandbox1e663f88e7a940299b6047946a73fe0c.mailgun.org',  
+    "MAILGUN_API_URL": 'https://api.mailgun.net/v3'
+}
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend" 
+DEFAULT_FROM_EMAIL = "personalfinancetracker@siddr.in" 
+SERVER_EMAIL = "siddhant.rao2003@gmail.com"
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',

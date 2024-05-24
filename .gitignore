@@ -138,4 +138,6 @@ GitHub.sublime-settings
 .history
 
 node_modules/
+package-lock.json
 uploads/
+static/CACHE/

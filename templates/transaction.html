@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block content %} 
+{% extends "base.html" %} {% block content %}
 <div class="px-4 sm:px-6 lg:px-8">
   <div class="sm:flex sm:items-center">
     <div class="sm:flex-auto">
@@ -56,7 +56,12 @@
             </thead>
             <tbody class="bg-white">
               <!-- Odd row -->
-              {% block rows %}{% endblock rows %}
+              {% if transactions %} {% block rows %}{% endblock rows %} 
+              {% else %}
+              <tr>
+                <td colspan="5" class="py-3.5 text-center text-sm font-semibold text-gray-900">No items</td>
+              </tr>
+              {% endif %}
 
               <!-- More people... -->
             </tbody>
@@ -66,10 +71,14 @@
     </div>
   </div>
 </div>
+{% if transactions %}
 {% include "pagination.html" %}
+
+{% endif %}
 
 <script>
   function add(e) {
+    console.log('add');
     document.getElementById('modalContainer').classList.toggle('hidden');
   }
 </script>

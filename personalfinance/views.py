@@ -11,56 +11,13 @@ from rest_framework.response import Response
 from django.shortcuts import redirect
 from django.http import Http404, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from .budget_tracker import hasBudgetExceeded
+from django.core.mail import send_mail
 
 
 @login_required
 def dashboard(request):
-    return render(request, "dashboard.html",{
-        "title": "Dashboard"
-    
-    })
-
-
-@login_required
-def incomes(request):
-    context = {}
-    print(request.user)
-    income = Income.objects.filter(user=request.user)
-    context["incomes"] = income
-    context["title"] = "Income"
-
-    return render(request, "income.html", context)
-
-
-@login_required
-def expenses(request):
-    context = {}
-
-    expense = Expense.objects.filter(user=request.user)
-    context["expenses"] = expense
-    context["title"] = "Expense"
-
-    return render(request, "expense.html", context)
-
-
-@login_required
-def edit_income(request, id):
-    context = {}
-    income = Income.objects.get(id=id)
-    context["income"] = income
-    context["title"] = "Edit Income"
-
-    return render(request, "edit_income.html", context)
-
-
-@login_required
-def edit_expense(request, id):
-    context = {}
-    expense = Expense.objects.get(id=id)
-    context["expense"] = expense
-    context["title"] = "Edit Expense"
-
-    return render(request, "edit_expense.html", context)
+    return render(request, "dashboard.html", {"title": "Dashboard"})
 
 
 # drf views
@@ -69,18 +26,20 @@ class IncomeView(APIView):
     template_name = "income.html"
     permission_classes = [IsAuthenticated]
 
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(
+        self, request, *args, **kwargs
+    ):  # redirect to login page if user is not authenticated
         if not request.user.is_authenticated:
             return redirect("/accounts/")
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, pk=None):
+    def get(self, request):
         context = {}
         incomes = Income.objects.filter(user=request.user)
         paginator = Paginator(incomes, 7)
         page = request.GET.get("page")
-        total_items = len(incomes)
-        
+        total_items = len(incomes)  # total number of items
+
         try:
             incomes = paginator.page(page)
         except PageNotAnInteger:
@@ -88,17 +47,17 @@ class IncomeView(APIView):
             page = 1
         except EmptyPage:
             incomes = paginator.page(paginator.num_pages)
-            
-        start_item = (int(page) - 1) * 7
-        end_item = start_item + 7
-        
+
+        start_item = (int(page) - 1) * 7  # first item on the page
+        end_item = start_item + 7  # last item on the page
+
         if end_item > total_items:
             end_item = total_items
-        
+
         start_item += 1
-            
+
         no_of_pages = paginator.num_pages
-        
+
         context["transactions"] = incomes
         context["title"] = "Income"
         context["no_of_pages"] = no_of_pages
@@ -126,7 +85,7 @@ class EditIncomeView(APIView):
             return redirect("/accounts/")
         return super().dispatch(request, *args, **kwargs)
 
-    def get_object(self, pk):
+    def get_object(self, pk):  # get the income object with the given pk
         try:
             return Income.objects.get(pk=pk)
         except Income.DoesNotExist:
@@ -134,7 +93,6 @@ class EditIncomeView(APIView):
 
     def get(self, request, pk):
         income = self.get_object(pk)
-        print(income)
         return Response(
             {"transaction": income, "title": "Edit Income", "name": "income"}
         )
@@ -162,6 +120,8 @@ class EditIncomeView(APIView):
         income.delete()
         return HttpResponse(status=204)
 
+
+# Expense views
 class ExpenseView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = "expense.html"
@@ -172,13 +132,13 @@ class ExpenseView(APIView):
             return redirect("/accounts/")
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request):
+    def get(self, request, budget_exceeded=None):
         context = {}
         expenses = Expense.objects.filter(user=request.user)
         paginator = Paginator(expenses, 7)
         page = request.GET.get("page")
         total_items = len(expenses)
-        
+
         try:
             expenses = paginator.page(page)
         except PageNotAnInteger:
@@ -186,17 +146,20 @@ class ExpenseView(APIView):
             page = 1
         except EmptyPage:
             expenses = paginator.page(paginator.num_pages)
-            
+
         start_item = (int(page) - 1) * 7
         end_item = start_item + 7
 
         if end_item > total_items:
             end_item = total_items
-            
+
         start_item += 1
-        
+
         no_of_pages = paginator.num_pages
         
+        if budget_exceeded:
+            context["budget_exceeded"] = budget_exceeded
+
         context["transactions"] = expenses
         context["title"] = "Expense"
         context["no_of_pages"] = no_of_pages
@@ -208,26 +171,12 @@ class ExpenseView(APIView):
 
     def post(self, request):
         serializer = ExpenseSerializer(data=request.data)
-        print(request.user)
-        print(serializer.is_valid())
         if serializer.is_valid():
             serializer.save(user=request.user)
-            return Response(
-                {
-                    "expenses": Expense.objects.filter(user=request.user),
-                    "title": "Expense",
-                }
-            )
+            budget_exceeded = hasBudgetExceeded(request.user, serializer.instance)
+            return self.get(request,budget_exceeded)
 
         return Response(serializer.errors, status=400)
-
-class ExpenseViewSet(viewsets.ModelViewSet):
-    queryset = Expense.objects.all()
-    serializer_class = ExpenseSerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
 
 class EditExpenseView(APIView):
@@ -346,21 +295,3 @@ class EditBudgetView(APIView):
         budget = self.get_object(pk)
         budget.delete()
         return HttpResponse(status=204)
-
-
-class IncomeViewSet(viewsets.ModelViewSet):
-    queryset = Income.objects.all()
-    serializer_class = IncomeSerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class BudgetViewSet(viewsets.ModelViewSet):
-    queryset = Budget.objects.all()
-    serializer_class = BudgetSerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
