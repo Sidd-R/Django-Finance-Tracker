@@ -11,6 +11,7 @@ class Transaction(models.Model):
     receipt = models.ImageField(upload_to="receipts/", blank=True, null=True)
     recurring = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    
 
     class Meta:
         abstract = True

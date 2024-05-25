@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Report</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #container {
+        margin: auto;
+        padding: 20px;
+      }
+      .text-xl {
+        font-size: 1.25rem;
+      }
+      .font-semibold {
+        font-weight: 600;
+      }
+      .mb-4 {
+        margin-bottom: 1rem;
+      }
+      .mt-8 {
+        margin-top: 2rem;
+      }
+      .text-center {
+        text-align: center;
+      }
+
+      .shadow {
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+      }
+
+      .max-h {
+        max-height: 40%;
+      }
+
+      .border {
+        border-width: 1px;
+        border-color: #e5e7eb;
+        border-radius: 6px;
+        border-width: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div class="shadow border">
+        <h1 class="text-xl font-semibold mb-4">Financial Report</h1>
+        <p class="">Total Income: Rs. {{ total_income|floatformat:2 }}</p>
+        <p class="mb-4">
+          Total Expenses: Rs. {{ total_expenses|floatformat:2 }}
+        </p>
+      </div>
+      <div class="mt-8 shadow max-h">
+        <h2 class="text-xl font-semibold mb-4">Expenses by Category</h2>
+        <img
+          src="data:image/png;base64,{{ expenses_by_category_img }}"
+          alt="Expenses by Category"
+          class="w-full"
+        />
+      </div>
+
+      <div class="page-break"></div>
+
+      <div class="mt-8 shadow max-h">
+        <h2 class="text-xl font-semibold mb-4">
+          Monthly Income and Expenses (Last 6 Months)
+        </h2>
+        <img
+          src="data:image/png;base64,{{ monthly_income_expenses_img }}"
+          alt="Monthly Income and Expenses"
+          class="w-full"
+        />
+      </div>
+
+      <div class="page-break"></div>
+
+      <div class="mt-8 shadow max-h">
+        <h2 class="text-xl font-semibold mb-4">Monthly Savings</h2>
+        <img
+          src="data:image/png;base64,{{ monthly_savings_img }}"
+          alt="Monthly Savings"
+          class="w-full"
+        />
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,26 +1,30 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div>
-    
-    <div>
-        <h2>Total Income: {{ total_income  }}</h2>
-        <h2>Total Expenses: {{ total_expenses }}</h2>
-    </div>
-    <div class="flex justify-evenly items-baseline mt-8" >
-
+  <div class="mx-10 shadow-md p-4 rounded-md">
+    <h2 class="text-xl font-semibold leading-7 text-gray-700 sm:truncate sm:text-3xl sm:tracking-tight">Total Income: ₹ {{ total_income | floatformat:2 }}</h2>
+    <h2 class="text-xl font-semibold leading-7 text-gray-700 sm:truncate sm:text-3xl sm:tracking-tight " >Total Expenses: ₹ {{ total_expenses|floatformat:2 }}</h2>
+  </div>
+  <div class="flex flex-wrap justify-between items-baseline mt-8 px-10">
     <div class="shadow-lg p-5 rounded-sm">
-    <!-- Expenses by Category -->
-        <h3>Expenses by Category</h3>
-        <canvas class="max-w-96 max-h-96 " id="expensesByCategoryChart"></canvas>
+      <!-- Expenses by Category -->
+      <h3>Expenses by Category</h3>
+      <canvas class="max-w-md" id="expensesByCategoryChart"></canvas>
     </div>
 
     <!-- Monthly Income and Expenses -->
     <div class="shadow-lg p-5 rounded-sm">
-        <h3 >Monthly Income and Expenses (Last 6 months)</h3>
-        <canvas class="max-w-96 max-h-80  " id="monthlyIncomeExpensesChart"></canvas>
+      <h3>Monthly Income and Expenses (Last 6 months)</h3>
+      <canvas
+        class="max-w-md max-h-72"
+        id="monthlyIncomeExpensesChart"
+      ></canvas>
     </div>
-    </div>
+  </div>
+
+  <div class="shadow-lg p-5 rounded-sm mt-9 px-10">
+    <h3>Monthly Savings (Last 6 months)</h3>
+    <canvas id="monthlySavingsChart" class="max-h-80"></canvas>
+  </div> 
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -117,5 +121,39 @@
           }
       }
   });
+
+   // Monthly Savings Chart
+   var ctx6 = document.getElementById('monthlySavingsChart').getContext('2d');
+   var monthlySavingsChart = new Chart(ctx6, {
+       type: 'line',
+       data: {
+           labels: [
+               {% for item in savings_by_month %}
+                   "{{ item.month|date:"F Y" }}",
+               {% endfor %}
+           ],
+           datasets: [{
+               label: 'Savings',
+               data: [
+                   {% for item in savings_by_month %}
+                       {{ item.savings }},
+                   {% endfor %}
+               ],
+               backgroundColor: 'rgba(75, 192, 192, 0.2)',
+               borderColor: 'rgba(75, 192, 192, 1)',
+               borderWidth: 1,
+               fill: true
+           }]
+       },
+       options: {
+           responsive: true,
+           maintainAspectRatio: true,
+           scales: {
+               y: {
+                   beginAtZero: true
+               }
+           }
+       }
+   });
 </script>
-{% endblock %}
+{% endblock content %}

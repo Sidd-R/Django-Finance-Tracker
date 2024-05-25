@@ -115,12 +115,10 @@
                         for="file-upload"
                         class="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
                       >
-                        <span>Upload a file</span>
                         <input
                           type="file"
                           id="receipt"
                           name="receipt"
-                
                         />
                       </label>
                     
@@ -133,12 +131,23 @@
               {% block name %}
               
               {% endblock name %}
-
+              
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <input
+                        id="recurring"
+                        name="recurring"
+                        type="checkbox"
+                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    />
+                    <label for="remember_me" class="ml-2 block text-sm text-gray-900">Recurring Monthly?</label>
+                </div>
+              </div>  
 
               <button
                 type="submit"
                 value="Submit"
-                class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto"
+                class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500  sm:w-auto"
               >submit</button>
 
               <button

@@ -13,4 +13,6 @@ urlpatterns = [
     path('budget/', views.BudgetView.as_view(), name='budget'),
     path('budget/edit/<int:pk>', views.EditBudgetView.as_view(), name='edit_budget'),
     path('due/<int:pk>', views.due_received, name='due'),
+    path('due/', RedirectView.as_view(url='/income/')),
+    path('reports/', views.reports, name='reports'),
 ]

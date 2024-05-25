@@ -56,8 +56,6 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'userprofile.UserProfile'
 
-
-
 ANYMAIL = {
     "MAILGUN_API_KEY": get_env('MAILGUN_API_KEY'),
     "MAILGUN_SENDER_DOMAIN": get_env('MAILGUN_SENDER_DOMAIN'),  
@@ -153,9 +151,17 @@ WSGI_APPLICATION = 'main.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': get_env('DB_NAME'),
+        'USER': get_env('DB_USER'),
+        'PASSWORD': get_env('DB_PASSWORD'),
+        'HOST': get_env('DB_HOST'),
+        'PORT': get_env('DB_PORT'),   
     }
 }
 
