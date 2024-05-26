@@ -32,7 +32,7 @@ SECRET_KEY = get_env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env('DEBUG') 
 
-ALLOWED_HOSTS = ['127.0.0.1','.vercel.app','.now.sh']
+ALLOWED_HOSTS = ['127.0.0.1','.onrender.com']
 
 
 # Application definition
