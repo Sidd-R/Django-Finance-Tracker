@@ -20,13 +20,15 @@ from .report_generator import generate_graphs
 
 @login_required
 def dashboard(request):
+    expense = Expense.objects.filter(user=request.user)
+    income = Income.objects.filter(user=request.user)
     # Calculate total income and expenses
-    total_income = Income.objects.aggregate(total=Sum("amount"))["total"] or 0
-    total_expenses = Expense.objects.aggregate(total=Sum("amount"))["total"] or 0
+    total_income = income.aggregate(total=Sum("amount"))["total"] or 0
+    total_expenses = expense.aggregate(total=Sum("amount"))["total"] or 0
 
     # Group expenses by category
     expenses_by_category = (
-        Expense.objects.values("category")
+        expense.values("category")
         .annotate(total=Sum("amount"))
         .order_by("-total")
     )
@@ -35,14 +37,14 @@ def dashboard(request):
     today = date.today()
     six_months_ago = today - timedelta(days=180)
     income_by_month = (
-        Income.objects.filter(date__gte=six_months_ago)
+        income.filter(date__gte=six_months_ago)
         .annotate(month=TruncMonth("date"))
         .values("month")
         .annotate(total=Sum("amount"))
         .order_by("month")
     )
     expenses_by_month = (
-        Expense.objects.filter(date__gte=six_months_ago)
+        expense.filter(date__gte=six_months_ago)
         .annotate(month=TruncMonth("date"))
         .values("month")
         .annotate(total=Sum("amount"))
@@ -53,19 +55,19 @@ def dashboard(request):
     savings_by_month = []
     months = [six_months_ago + timedelta(days=30 * (i + 1)) for i in range(6)]
     for month in months:
-        income = (
-            Income.objects.filter(
+        incomes = (
+            income.filter(
                 date__year=month.year, date__month=month.month
             ).aggregate(total=Sum("amount"))["total"]
             or 0
         )
         expenses = (
-            Expense.objects.filter(
+            expense.filter(
                 date__year=month.year, date__month=month.month
             ).aggregate(total=Sum("amount"))["total"]
             or 0
         )
-        savings_by_month.append({"month": month, "savings": income - expenses})
+        savings_by_month.append({"month": month, "savings": incomes - expenses})
 
     context = {
         "total_income": total_income,
@@ -228,10 +230,8 @@ class ExpenseView(LoginRequiredMixin, APIView):
 
     def post(self, request):
         serializer = ExpenseSerializer(data=request.data)
-        print(request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
-            print(serializer.data)
 
             budget_exceeded = hasBudgetExceeded(request.user, serializer.instance)
             return self.get(request, budget_exceeded)
@@ -252,7 +252,6 @@ class EditExpenseView(LoginRequiredMixin, APIView):
 
     def get(self, request, pk):
         expense = self.get_object(pk)
-        print(expense)
         return Response(
             {"transaction": expense, "title": "Edit Expense", "name": "expense"}
         )
@@ -313,7 +312,6 @@ class EditBudgetView(LoginRequiredMixin, APIView):
 
     def get(self, request, pk):
         budget = self.get_object(pk)
-        print(budget)
         return Response({"budget": budget, "title": "Edit Budget", "name": "budget"})
 
     def post(self, request, pk):
@@ -332,7 +330,6 @@ class EditBudgetView(LoginRequiredMixin, APIView):
         if serializer.is_valid():
             serializer.save()
             return redirect("budget")
-        print(serializer.errors)
         return Response(serializer.errors, status=400)
 
     def delete(self, request, pk):
@@ -375,25 +372,26 @@ def reports(request):
     elif request.method == 'POST':
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
+        
         try:
             start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-            
-            # increment end_date month by 1
-            # end_date = end_date + timedelta(days=30)
         except (ValueError, TypeError):
             return HttpResponse('Invalid date format. Please use YYYY-MM-DD.')
+        
+        income = Income.objects.filter(user=request.user)
+        expense = Expense.objects.filter(user=request.user)
 
         # Calculate total income and expenses within the date range
-        total_income = Income.objects.filter(date__range=(start_date, end_date)).aggregate(total=Sum('amount'))['total'] or 0
-        total_expenses = Expense.objects.filter(date__range=(start_date, end_date)).aggregate(total=Sum('amount'))['total'] or 0
+        total_income = income.filter(date__range=(start_date, end_date)).aggregate(total=Sum('amount'))['total'] or 0
+        total_expenses = expense.filter(date__range=(start_date, end_date)).aggregate(total=Sum('amount'))['total'] or 0
 
         # Group expenses by category within the date range
-        expenses_by_category = Expense.objects.filter(date__range=(start_date, end_date)).values('category').annotate(total=Sum('amount')).order_by('-total')
+        expenses_by_category = expense.filter(date__range=(start_date, end_date)).values('category').annotate(total=Sum('amount')).order_by('-total')
 
         # Calculate monthly income and expenses within the date range
-        income_by_month = Income.objects.filter(date__range=(start_date, end_date)).annotate(month=TruncMonth('date')).values('month').annotate(total=Sum('amount')).order_by('month')
-        expenses_by_month = Expense.objects.filter(date__range=(start_date, end_date)).annotate(month=TruncMonth('date')).values('month').annotate(total=Sum('amount')).order_by('month')
+        income_by_month = income.filter(date__range=(start_date, end_date)).annotate(month=TruncMonth('date')).values('month').annotate(total=Sum('amount')).order_by('month')
+        expenses_by_month = expense.filter(date__range=(start_date, end_date)).annotate(month=TruncMonth('date')).values('month').annotate(total=Sum('amount')).order_by('month')
 
         # Combine income and expense data for looping in template
         income_expense_data = list(zip(income_by_month, expenses_by_month))
@@ -402,9 +400,9 @@ def reports(request):
         savings_by_month = []
         months = [start_date + timedelta(days=30 * i) for i in range((end_date - start_date).days // 30 + 1)]
         for month in months:
-            income = Income.objects.filter(date__year=month.year, date__month=month.month).aggregate(total=Sum('amount'))['total'] or 0
-            expenses = Expense.objects.filter(date__year=month.year, date__month=month.month).aggregate(total=Sum('amount'))['total'] or 0
-            savings_by_month.append({'month': month, 'savings': income - expenses})
+            incomes = income.filter(date__year=month.year, date__month=month.month).aggregate(total=Sum('amount'))['total'] or 0
+            expenses = expense.filter(date__year=month.year, date__month=month.month).aggregate(total=Sum('amount'))['total'] or 0
+            savings_by_month.append({'month': month, 'savings': incomes - expenses})
 
         # Generate graphs
         expenses_by_category_img, monthly_income_expenses_img, monthly_savings_img = generate_graphs(expenses_by_category, income_by_month, expenses_by_month, savings_by_month)
