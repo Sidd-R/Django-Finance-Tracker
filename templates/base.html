@@ -28,9 +28,10 @@
               </button>
             </div>
       
-            <div class="flex-shrink-0 px-4 flex items-center">
+            <a href="/dashboard/" class="flex-shrink-0 px-4 flex items-center">
+              
               PERSONAL FINANCE TRACKER
-            </div>
+            </a>
             <div class="mt-5 flex-1 h-0 overflow-y-auto">
               <nav class="px-2 space-y-1">
                 <a href="#" class="bg-gray-100 text-gray-900 group rounded-md py-2 px-2 flex items-center text-base font-medium">
@@ -93,9 +94,9 @@
         <div class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
           <!-- Sidebar component, swap this element with another sidebar if you like -->
           <div class="border-r border-gray-200 pt-5 flex flex-col flex-grow bg-white overflow-y-auto">
-            <div class="flex-shrink-0 px-4 flex items-center">
+            <a href="/dashboard/" class="flex-shrink-0 px-4 flex items-center">
               PERSONAL FINANCE TRACKER
-            </div>
+            </a>
             <div class="flex-grow mt-5 flex flex-col">
               <nav class="flex-1 px-2 pb-4 space-y-1">
                 <!-- Current: "bg-gray-100 text-gray-900", Default: "text-gray-600 hover:bg-gray-50 hover:text-gray-900" -->
@@ -198,9 +199,9 @@
                     </div>
                     <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 focus:outline-none hidden   " role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1" id="user-menu">
                       <!-- Active: "bg-gray-100", Not Active: "" -->
-                      <a href="/accounts/" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">Your Profile</a>
-      
-                      <a href="#" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">Settings</a>
+                      {% comment %} <a href="/accounts/" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">Your Profile</a> {% endcomment %}
+{% comment %}       
+                      <a href="#" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">Settings</a> {% endcomment %}
                       <form action="/accounts/logout/" method="post">
                         {% csrf_token %}
                         <button type="submit" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</button>
